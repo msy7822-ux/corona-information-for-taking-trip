@@ -7,7 +7,7 @@ module GoogleApiMethods
   include LinebotApiMethods
 
   ### google_places APIのキー
-  API_KEY = "AIzaSyAxyCrXh9y18f-HBWqZarIS0-0fV-cD6W8"
+  API_KEY = ENV['GOOGLE_PLACE_API_KEY']
 
   def access_google_places(lat, lng, token)
     rad = 5000
