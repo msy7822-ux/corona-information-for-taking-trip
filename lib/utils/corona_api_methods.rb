@@ -1,6 +1,8 @@
 require './lib/utils/linebot_api_methods'
+require './lib/utils/flex_message'
 module CoronaApiMethods
   include LinebotApiMethods
+  include FlexMessage
 
   ### 47都道府県
   PREFECTURES = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県",
@@ -43,16 +45,37 @@ module CoronaApiMethods
   ### 直近３０日間の感染者数をユーザーに知らせるテキストメッセージを作成する
   def create_positives_status_message(pref_name)
     ### 直近30日のデータを取得する
-    positives_near_30days = infected_number_for_each_prefecture(pref_name)['itemList'].slice(0, 30).map{|hash| hash["npatients"].to_i }
+    positives_near_30days = infected_number_for_each_prefecture(pref_name)['itemList'].slice(0, 30).map{|hash| hash["npatients"].to_i }.reverse
 
-    total_positives = positives_near_30days[0] - positives_near_30days[29]
+    p total_positives = positives_near_30days[29] - positives_near_30days[0]
     ### 受け取りメッセージの型は気にしない
-    message = {
-      type: 'text',
-      text: "#{pref_name}の直近１ヶ月の感染者数#{total_positives}人"
-    }
-    create_quick_reply(pref_name, total_positives)
+
+    ### 危険： #ff0000
+    ### 注意： #ffd100
+    ### 安全： #00a0df
+    color = nil
+    status = nil
+
+    if total_positives > 3000
+      color = "#ff0000"
+      status = "危険"
+    elsif total_positives < 1000
+      color = "#00a0df"
+      status = "安全"
+    elsif total_positives <= 1000
+      color = "#ffd100"
+      status = "注意"
+    elsif total_positives <= 3000
+      color = "#c76a00"
+      status = "要注意"
+    end
+
+    p color
+
+    ### 感染者メッセージを作成する
+    positives_message(pref_name, total_positives, color, status)
   end
+
 
   ### 全国の直近３０日の感染者数を返す
   def positives_near_30days_all_prefectures
@@ -92,14 +115,6 @@ module CoronaApiMethods
     response = http.request_get(uri).body.force_encoding("UTF-8")
     JSON.parse(response)
   end
-
-
-
-
-
-
-
-
 
 
 

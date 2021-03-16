@@ -2,12 +2,14 @@ require './lib/utils/google_api_methods'
 require './lib/utils/corona_api_methods'
 require './lib/utils/linebot_api_methods'
 require './lib/utils/physical_condition'
+require './lib/utils/flex_message'
 
 class LineBotController < ApplicationController
   include CoronaApiMethods
   include LinebotApiMethods
   include PhysicalCondition
   include GoogleApiMethods
+  include FlexMessage
   # CSRFを無効化する
   protect_from_forgery except: [:callback]
 
@@ -126,9 +128,10 @@ class LineBotController < ApplicationController
         return
       end
 
-      message = create_positives_status_message(event['message']['text'])
+      pp message = create_positives_status_message(event['message']['text'])
+
       ### ユーザーに返信する
-      client.reply_message(event['replyToken'], message)
+      p client.reply_message(event['replyToken'], message)
 
 
 
@@ -167,7 +170,7 @@ class LineBotController < ApplicationController
         return
       end
       ### ユーザーに返信する
-      client.reply_message(event['replyToken'], counterplanes)
+      client.reply_message(event['replyToken'], create_flex_message)
 
 
 
@@ -182,11 +185,6 @@ class LineBotController < ApplicationController
         return
       end
 
-      # pp create_quick_reply_all
-      message = {
-        type: 'text',
-        text: 'message'
-      }
       client.reply_message(event['replyToken'], create_quick_reply_all)
 
 
@@ -404,14 +402,5 @@ class LineBotController < ApplicationController
     end
   end
 
-
-  ### 具体的な対策を表示するメソッド
-  def counterplanes
-    message = {
-      type: 'text',
-      text: "密集・密接・密室を避ける\nマスク\nアルコール消毒\n安全な距離を保つ\nこまめに手を洗う\n室内換気と咳エチケット\n接触確認アプリをインストール\n\nCOVID-19（新型コロナウイルス感染症）の感染拡大を防ぐには:\n手を清潔に保ちましょう。石けんで手洗いを行うか、手指消毒用アルコールで消毒を行いましょう。\n咳やくしゃみをする人からの距離を保ちましょう。\n対人距離を維持できない場合はマスクをしましょう。\n自分の目、鼻、口に触るのは止めましょう。\n咳やくしゃみをするときは、肘の内側またはティッシュ ペーパーで鼻と口を覆いましょう。\n具合が悪いときは自宅にいるようにしましょう。\n発熱、咳、呼吸が苦しい場合は、医師の診察を受けてください。\n事前に電話をすることで、医療従事者から適切な医療機関の案内を迅速に受けることができます。\nまた、マスクを使うことは、マスクを着用している人から他の人へのウイルスの拡散を防ぐのに役立ちます。 マスクだけでは COVID-19 を防ぐことはできませんので、対人距離の確保と手指衛生の維持を併せて行う必要があります。 地域の保健所の助言に従ってください。
-      "
-    }
-  end
 end
 

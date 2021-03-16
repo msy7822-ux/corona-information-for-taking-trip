@@ -44,28 +44,21 @@ module LinebotApiMethods
     User.create!(line_id: line_id)
   end
 
-
-
-  def quick_reply_prefs
-    ["北海道", "宮城県", "千葉県","東京都","神奈川県","石川県", "愛知県", "京都府","大阪府","兵庫県", "福岡県", "沖縄県"]
-  end
-
-
-
   ### クイックリプライを作成する
-  def create_quick_reply(pref_name, total_positives)
-    items = [
-      {"type": "action", "imageUrl": "", "action": { "type": "message", "label": "全国", "text": "全国"}}
-    ]
-    quick_reply_prefs.each do |pref|
-      items << {"type": "action", "imageUrl": "", "action": { "type": "message", "label": "#{pref}", "text": "#{pref}"}}
-    end
-    message = {
-      'type': 'text',
-      'text': "#{pref_name}の直近１ヶ月の感染者数#{total_positives}人",
-      'quickReply': {
-        'items': items
-      }
-    }
-  end
+  # def create_quick_reply(pref_name, total_positives, message)
+  #   items = [
+  #     {"type": "action", "imageUrl": "", "action": { "type": "message", "label": "全国", "text": "全国"}}
+  #   ]
+  #   quick_reply_prefs.each do |pref|
+  #     items << {"type": "action", "imageUrl": "", "action": { "type": "message", "label": "#{pref}", "text": "#{pref}"}}
+  #   end
+  #   message = {
+  #     'type': 'text',
+  #     'text': "#{pref_name}の直近１ヶ月の感染者数#{total_positives}人",
+  #     'quickReply': {
+  #       'items': items
+  #     }
+  #   }
+  # end
+
 end
