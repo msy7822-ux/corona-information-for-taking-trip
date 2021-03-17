@@ -1,15 +1,12 @@
 require './lib/utils/google_api_methods'
-require './lib/utils/corona_api_methods'
 require './lib/utils/linebot_api_methods'
 require './lib/utils/physical_condition'
-require './lib/utils/flex_message'
+
 
 class LineBotController < ApplicationController
-  include CoronaApiMethods
   include LinebotApiMethods
   include PhysicalCondition
   include GoogleApiMethods
-  include FlexMessage
   # CSRFを無効化する
   protect_from_forgery except: [:callback]
 
@@ -68,7 +65,8 @@ class LineBotController < ApplicationController
       when Line::Bot::Event::MessageType::Location
         lat = event["message"]["latitude"]
         lng = event["message"]["longitude"]
-        access_google_places(lat, lng, event['replyToken'])
+        message = access_google_places(lat, lng)
+        client.reply_message(event['replyToken'], message)
       end
       # userId取得
       userId = event['source']['userId']

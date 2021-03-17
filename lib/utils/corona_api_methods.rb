@@ -1,7 +1,7 @@
-require './lib/utils/linebot_api_methods'
+# require './lib/utils/linebot_api_methods'
 require './lib/utils/flex_message'
 module CoronaApiMethods
-  include LinebotApiMethods
+  # include LinebotApiMethods
   include FlexMessage
 
   ### 47都道府県
@@ -26,20 +26,20 @@ module CoronaApiMethods
   end
 
 
-  ### 存在する市町村なのか判定する
-  def confirm_city_is_exist?(pref_name, city_name)
-    ### 都道府県コードを取得する(01 ~ 47)
-    pref_index = (PREFECTURES.index(pref_name) + 1).to_s
+  # ### 存在する市町村なのか判定する
+  # def confirm_city_is_exist?(pref_name, city_name)
+  #   ### 都道府県コードを取得する(01 ~ 47)
+  #   pref_index = (PREFECTURES.index(pref_name) + 1).to_s
 
-    ### 都道府県コードが一桁の場合、先頭に０を追加する
-    pref_index = "0" + pref_index if pref_index.size == 1
+  #   ### 都道府県コードが一桁の場合、先頭に０を追加する
+  #   pref_index = "0" + pref_index if pref_index.size == 1
 
-    params = URI.encode_www_form({area: "#{pref_index}"})
-    url = "https://www.land.mlit.go.jp/webland/api/CitySearch?#{params}"
-    uri = URI.parse(url)
-    all_cities = access_api(uri)['data'].map{|hash| hash['name'] }
-    all_cities.include?(city_name)
-  end
+  #   params = URI.encode_www_form({area: "#{pref_index}"})
+  #   url = "https://www.land.mlit.go.jp/webland/api/CitySearch?#{params}"
+  #   uri = URI.parse(url)
+  #   all_cities = access_api(uri)['data'].map{|hash| hash['name'] }
+  #   all_cities.include?(city_name)
+  # end
 
 
   ### 直近３０日間の感染者数をユーザーに知らせるテキストメッセージを作成する
@@ -47,7 +47,7 @@ module CoronaApiMethods
     ### 直近30日のデータを取得する
     positives_near_30days = infected_number_for_each_prefecture(pref_name)['itemList'].slice(0, 30).map{|hash| hash["npatients"].to_i }.reverse
 
-    p total_positives = positives_near_30days[29] - positives_near_30days[0]
+    total_positives = positives_near_30days[29] - positives_near_30days[0]
     ### 受け取りメッセージの型は気にしない
 
     ### 危険： #ff0000
