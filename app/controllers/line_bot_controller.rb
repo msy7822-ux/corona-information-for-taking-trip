@@ -23,8 +23,9 @@ class LineBotController < ApplicationController
   @@point = 0
   ### 前回、ユーザーが送信したメッセージ（テキスト）
   @@previous_message = nil
-  ### 体調チェックのタイミング
-  @@check_timing = nil
+  ### 一回前の質問のpoint
+  @@previous_point = 0
+  ##### コロナの症状のものと、そうではないものが合致して０になるのと、全ていいえで０になるのとは別なので、切り分けるためのクラス変数を用意する
 
 
 
@@ -128,10 +129,10 @@ class LineBotController < ApplicationController
         return
       end
 
-      pp message = create_positives_status_message(event['message']['text'])
+      message = create_positives_status_message(event['message']['text'])
 
       ### ユーザーに返信する
-      p client.reply_message(event['replyToken'], message)
+      client.reply_message(event['replyToken'], message)
 
 
 
@@ -149,10 +150,7 @@ class LineBotController < ApplicationController
       positives_num = positives_near_30days_all_prefectures.slice(-30, 30).map{|hash| hash["positive"].to_i}
       num = positives_num[29] - positives_num[0]
 
-      message = {
-        type: 'text',
-        text: "全国の直近30日間の感染者数は#{num}人です。"
-      }
+      message = positives_message("全国", num, "#1a1a1a", "注意")
 
       client.reply_message(event['replyToken'], message)
 
@@ -178,14 +176,14 @@ class LineBotController < ApplicationController
 
 
 
-    elsif event['message']['text'] == '目的地の県の感染者数を知る'
+    elsif event['message']['text'] == '目的地の感染者数を確認する'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
         receive_unrelated_message_while_question(event, userId)
         return
       end
-
-      client.reply_message(event['replyToken'], create_quick_reply_all)
+      # p client.reply_message(event['replyToken'], display_destination_positives)
+      p client.reply_message(event['replyToken'], create_quick_reply_all)
 
 
 
@@ -203,29 +201,6 @@ class LineBotController < ApplicationController
         text: predict_total_positives.join("\n")
       }
       client.reply_message(event['replyToken'], message)
-
-
-
-    # elsif event['message']['text'] == '旅行後です🙅‍♂️' || event['message']['text'] == '旅行前です🙆‍♂️'
-    #   ### 一個前のメッセージが「体調チェックをする」になっていないとreturn
-    #   return if @@previous_message == '体調チェックをする'
-
-    #   ### 体調チェック中に送信された時の処理
-    #   if @@count != 0 && @@is_checking
-    #     ### クラス変数の初期化処理
-    #     initialize_class_variable
-    #     stop_question_message(event['replyToken'])
-    #     return
-    #   end
-
-    #   ### 体調チェック時以外はスルーする
-    #   return if (event['message']['text'] == '旅行後です🙅‍♂️' || event['message']['text'] == '旅行前です🙆‍♂️') && @@count == 0 && @@is_checking == false
-
-    #   if event['message']['text'] == '旅行前です🙆‍♂️'
-    #     @@check_timing = 'before trip'
-    #   elsif event['message']['text'] == '旅行後です🙅‍♂️'
-    #     @@check_timing = 'after trip'
-    #   end
 
 
     elsif event['message']['text'] == '体調チェックをする' || event['message']['text'] == 'はい🙆‍♂️' || event['message']['text'] == 'いいえ🙅‍♂️'
@@ -247,20 +222,27 @@ class LineBotController < ApplicationController
       ### 何問目の質問かは、クラス変数で保持
       if @@count < QUESTIONS_NUM
         message, point = create_confirm_message(@@count)
+        # @@previous_point = point
+        ### ここでいったんメッセージを送信しているので処理は終わるのか？
         client.reply_message(event['replyToken'], message)
-        @@point += point if event['message']['text'] == 'はい🙆‍♂️'
+
+        ### もし「はい」がきたら、前回の質問が「はい」ということだから、前回のポイントを追加する
+        @@point += @@previous_point if event['message']['text'] == 'はい🙆‍♂️'
         @@count += 1
+
+        p @@point
+        @@previous_point = point
       elsif @@count == QUESTIONS_NUM
         ### ユーザーに表示するための診断結果を作成する
         diagnosis_result = create_diagnosis_result(@@point)
         client.reply_message(event['replyToken'], diagnosis_result)
 
         ### 旅行前なのか後なのか？
-        if @@check_timing == 'before trip'
-          User.update(condition_check_before_trip_is_ended: true)
-        elsif @@check_timing == 'after trip'
-          User.update(condition_check_before_trip_is_ended: false)
-        end
+        # if @@check_timing == 'before trip'
+        #   User.update(condition_check_before_trip_is_ended: true)
+        # elsif @@check_timing == 'after trip'
+        #   User.update(condition_check_before_trip_is_ended: false)
+        # end
 
         ### クラス変数の初期化処理
         initialize_class_variable
@@ -278,13 +260,17 @@ class LineBotController < ApplicationController
         return
       end
 
-      message = {
-        type: 'text',
-        text: "あなたの最寄りの医療施設を検索します。\nメッセージ入力欄のカメラマークの左から位置情報を送信してください。"
-      }
-      client.reply_message(event['replyToken'], message)
+      client.reply_message(event['replyToken'], display_geo_button)
 
-    ### その他大勢のメッセージ
+    elsif event['message']['text'] == 'ヘルプ'
+      ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
+      if @@count != 0 || @@is_checking == true
+        receive_unrelated_message_while_question(event, userId)
+        return
+      end
+      client.reply_message(event['replyToken'], help_flex)
+
+      ### その他大勢のメッセージ
     else
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -326,10 +312,28 @@ class LineBotController < ApplicationController
 
   ### 体調チェックによる診断結果の作成
   def create_diagnosis_result(point)
-    if point <= 0
+    if point < 0
       message = {
         type: "text",
-        text: "あなたの危険ポイントは#{@@point}です\n体調に問題はなさそうですので、万全の対策をして旅行を楽しんでください！🤗",
+        text: "あなたの危険ポイントは#{@@point}です\n\nコロナウィルスの感染の疑いは少ないですが、体調が万全の状態ではないと思われます。\n\nもし心配であれば、医者に相談することをおすすめします😌",
+        "quickReply": {
+          "items": [
+            {
+              "type": "action",
+              "imageUrl": "",
+              "action": {
+                "type": "message",
+                "label": "医療施設を検索する",
+                "text": "医療施設を検索する"
+              }
+            }
+          ]
+        }
+      }
+    elsif point == 0
+      message = {
+        type: "text",
+        text: "あなたの危険ポイントは#{@@point}です\n\n体調に問題はなさそうですので、万全の対策をして旅行を楽しんでください！🤗",
         "quickReply": {
           "items": [
             {
@@ -348,7 +352,7 @@ class LineBotController < ApplicationController
     elsif point < 2
       message = {
         type: "text",
-        text: "あなたの危険ポイントは#{@@point}です\n感染していると断定はできませんが、不安ならかかりつけ医に電話相談し旅行は控えたほうが良いかもしれませんね。😥",
+        text: "あなたの危険ポイントは#{@@point}です\n\n感染していると断定はできませんが、不安ならかかりつけ医に電話相談し旅行は控えたほうが良いかもしれませんね。😥",
         "quickReply": {
           "items": [
             {
@@ -366,7 +370,7 @@ class LineBotController < ApplicationController
     elsif point < 9
       message = {
         type: "text",
-        text: "あなたの危険ポイントは#{@@point}です\n旅行は中止し、かかりつけ医に電話相談しその指示に従ってください。😖",
+        text: "あなたの危険ポイントは#{@@point}です\n\n旅行は中止し、かかりつけ医に電話相談しその指示に従ってください。😖",
         "quickReply": {
           "items": [
             {
@@ -384,7 +388,7 @@ class LineBotController < ApplicationController
     elsif point >= 10
       message = {
         type: "text",
-        text: "あなたの危険ポイントは#{@@point}です\nあなたには、感染の疑いがあります。\n早急に保健所に連絡してください。😰",
+        text: "あなたの危険ポイントは#{@@point}です\n\nあなたには、感染の疑いがあります。\n早急に保健所に連絡してください。😰",
         "quickReply": {
           "items": [
             {

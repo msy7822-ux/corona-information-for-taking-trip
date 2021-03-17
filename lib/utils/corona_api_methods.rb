@@ -56,21 +56,21 @@ module CoronaApiMethods
     color = nil
     status = nil
 
+
+    ### FIXME:
     if total_positives > 3000
       color = "#ff0000"
       status = "危険"
     elsif total_positives < 1000
       color = "#00a0df"
       status = "安全"
-    elsif total_positives <= 1000
+    elsif total_positives >= 1000
       color = "#ffd100"
       status = "注意"
-    elsif total_positives <= 3000
+    elsif total_positives >= 2000
       color = "#c76a00"
       status = "要注意"
     end
-
-    p color
 
     ### 感染者メッセージを作成する
     positives_message(pref_name, total_positives, color, status)
@@ -129,7 +129,7 @@ module CoronaApiMethods
     end
     message = {
       'type': 'text',
-      'text': "都道府県を一つ選択してください。\n\n※下記のボタンは全都道府県分はありませんので、メッセージ欄から入力して検索してみてください🔎",
+      'text': "都道府県を一つ選択してください。\n\n※下記のボタンは全都道府県分はありませんので、メッセージ欄から入力して検索してみてください。\n\nまた、「目的地の感染者数」というボタンをクリックしていただければ、もう一度都道府県のボタンを再度、生成することができます。",
       'quickReply': {
         'items': items
       }

@@ -1,7 +1,6 @@
 require './lib/utils/corona_api_methods'
 require './lib/utils/linebot_api_methods'
 
-
 module GoogleApiMethods
   include CoronaApiMethods
   include LinebotApiMethods
