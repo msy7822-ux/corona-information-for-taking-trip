@@ -17,10 +17,6 @@ module LinebotApiMethods
     client.reply_message(token, message)
   end
 
-
-
-
-
   ### 入力された都道府県が見つからなかった時の処理
   def not_find_pref(token)
     message = {
