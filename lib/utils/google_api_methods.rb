@@ -15,17 +15,11 @@ module GoogleApiMethods
 
     uri = URI.parse(url)
 
-    hospital_infos = ''
-
+    hospital_infos = []
     access_api(uri)['results'].map{ |hash|
-      hospital_infos += "#{hash['name']},\n#{hash['vicinity']}\n\n"
+      hospital_infos << [hash['name'], hash['vicinity']]
     }
-
-    message = {
-      type: 'text',
-      text: hospital_infos
-    }
-
+    message = display_hospitals_flex_message(hospital_infos)
     client.reply_message(token, message)
   end
 end

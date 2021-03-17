@@ -22,7 +22,7 @@ namespace :line_bot do
       }
     }
     ### 出発前の体調チェックを終えているユーザーのみを取得
-    users_checked_condition = User.where(condition_check_before_trip_is_ended: true)
+    users_checked_condition = User.where(condition_check_before_trip_is_ended: false)
     ### 出発前の体調チェック終えているユーザーに毎晩8時半に体調チェックをpush通知する　
     users_checked_condition.each do |user|
       client.push_message(user.line_id, message)

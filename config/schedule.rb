@@ -27,6 +27,6 @@ set :environment, rails_env
 # ログの出力先の設定
 set :output, "#{Rails.root}/log/cron.log"
 
-every 1.day, at: ['21:30 pm'] do # タスクを処理するペースを記載する。（例は毎晩８：３０に実行）
+every 1.day, at: ['21:00 pm'] do # タスクを処理するペースを記載する。（例は毎晩８：３０に実行）
   rake 'line_bot:scheduler_push'
 end

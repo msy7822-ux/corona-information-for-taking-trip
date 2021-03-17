@@ -2,6 +2,84 @@
 module FlexMessage
   # include LinebotApiMethods
 
+  def create_hospitals_list(hospitals)
+    contents = []
+    hospitals.each do |hospital|
+      contents << {"type": "separator"}
+      contents << {
+        "type": "text",
+        "text": "#{hospital[0]}",
+        "size": "md",
+        "wrap": true,
+        "adjustMode": "shrink-to-fit",
+        "gravity": "center",
+        "margin": "xl"
+      }
+      contents << {
+        "type": "text",
+        "text": "#{hospital[1]}",
+        "size": "xxs",
+        "wrap": true,
+        "adjustMode": "shrink-to-fit",
+        "gravity": "center"
+      }
+    end
+
+    contents
+  end
+
+
+  def display_hospitals_flex_message(hospitals)
+    {
+      "type": "flex",
+      "altText": "医療施設の検索結果の一覧です。",
+      "contents": {
+        "type": "carousel",
+        "contents": [
+          {
+            "type": "bubble",
+            "size": "mega",
+            "header": {
+              "type": "box",
+              "layout": "vertical",
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "最寄りの医療施設一覧",
+                  "size": "lg",
+                  "align": "center",
+                  "wrap": true,
+                  "adjustMode": "shrink-to-fit"
+                },
+                {
+                  "type": "separator",
+                  "margin": "md"
+                }
+              ]
+            },
+            "hero": {
+              "type": "box",
+              "layout": "vertical",
+              "contents": [
+                {
+                  "type": "image",
+                  "url": "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/hospital-71.png"
+                }
+              ]
+            },
+            "body": {
+              "type": "box",
+              "layout": "vertical",
+              "contents": create_hospitals_list(hospitals),
+              "margin": "lg",
+              "spacing": "none"
+            }
+          }
+        ]
+      }
+    }
+  end
+
   def create_boxes(array)
     contents = []
     array.each.with_index(1) do |data, index|
@@ -37,7 +115,7 @@ module FlexMessage
   def create_predict_flex(array)
     {
       "type": "flex",
-      "altText": "this is a flex message",
+      "altText": "今後30日間の感染者数の予測です。",
       "contents": {
         "type": "bubble",
         "header": {
@@ -78,7 +156,7 @@ module FlexMessage
   def help_flex
     {
       "type": "flex",
-      "altText": "this is a flex message",
+      "altText": "このサービスについて",
       "contents":     {
         "type": "carousel",
         "contents": [
@@ -354,7 +432,7 @@ module FlexMessage
   def display_destination_positives
     {
       "type": "flex",
-      "altText": "this is a flex message",
+      "altText": "目的地の感染者数です。",
       "contents": {
         "type": "carousel",
         "contents": [
@@ -385,7 +463,7 @@ module FlexMessage
               "contents": [
                 {
                   "type": "text",
-                  "text": "下から都道府県を一つ選択してください。",
+                  "text": "下から都道府県を一つ選択してください",
                   "size": "sm",
                   "align": "center",
                   "wrap": true,
@@ -402,14 +480,14 @@ module FlexMessage
               "contents": [
                 {
                   "type": "text",
-                  "text": "※ 都道府県のボタンはランダムで生成されるため、全都道府県ありませんので入力欄から検索してください。",
+                  "text": "※ 都道府県のボタンはランダムで生成されるため、全都道府県ありませんので入力欄から検索してください",
                   "wrap": true,
                   "adjustMode": "shrink-to-fit",
                   "size": "xs"
                 },
                 {
                   "type": "text",
-                  "text": "また、下のボタンをクリックしていただければ、もう一度都道府県のボタンを再度、生成することができます。",
+                  "text": "また、下のボタンをクリックしていただければ、もう一度都道府県のボタンを生成することができます",
                   "wrap": true,
                   "adjustMode": "shrink-to-fit",
                   "size": "xs",
@@ -438,7 +516,7 @@ module FlexMessage
   def display_geo_button
     {
       "type": "flex",
-      "altText": "this is a flex message",
+      "altText": "位置情報ボタンです。",
       "contents": {
         "type": "carousel",
         "contents": [
@@ -519,7 +597,7 @@ module FlexMessage
   def positives_message(pref, total_positives, color, status)
     {
       "type": "flex",
-      "altText": "this is a flex message",
+      "altText": "都道府県の感染者数です。",
       "contents": {
         "type": "bubble",
         "size": "mega",
