@@ -11,7 +11,8 @@ module CoroInfo
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.1
     ### 独自moduleを作成するために下記を追加
-    config.paths.add 'lib', eager_load: true
+    # config.paths.add 'lib', eager_load: true
+    config.paths.add 'lib', eager_load: false
 
     # Configuration for the application, engines, and railties goes here.
     #
