@@ -183,7 +183,7 @@ class LineBotController < ApplicationController
         return
       end
       # p client.reply_message(event['replyToken'], display_destination_positives)
-      p client.reply_message(event['replyToken'], create_quick_reply_all)
+      client.reply_message(event['replyToken'], create_quick_reply_all)
 
 
 
@@ -196,10 +196,16 @@ class LineBotController < ApplicationController
       end
 
       predict_total_positives = predict_future_positives.map{|hash| "#{hash["date"].to_s.slice(-4, 4)}, #{hash["positive"]}" }
-      message = {
-        type: 'text',
-        text: predict_total_positives.join("\n")
+      first_day_future_predict = predict_total_positives[0].split(', ')[1].to_i
+      last_days_for_a_week = []
+      predict_total_positives.each_slice(7){|arr| last_days_for_a_week << arr.last.split(', ') if arr.size == 7 }
+      positives_each_week = last_days_for_a_week.map{ |arr|
+        array = [arr[0].insert(2, '/'), arr[1].to_i - first_day_future_predict]
+        first_day_future_predict += arr[1].to_i - first_day_future_predict
+        array
       }
+
+      message = create_predict_flex(positives_each_week)
       client.reply_message(event['replyToken'], message)
 
 

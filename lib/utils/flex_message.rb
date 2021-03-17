@@ -2,6 +2,77 @@
 module FlexMessage
   # include LinebotApiMethods
 
+  def create_boxes(array)
+    contents = []
+    array.each.with_index(1) do |data, index|
+      contents << {
+        "type": "text",
+        "text": "hello, world",
+        "contents": [
+          {
+            "type": "span",
+            "text": "第#{index}週目:　"
+          },
+          {
+            "type": "span",
+            "text": "#{data[0]}　"
+          },
+          {
+            "type": "span",
+            "text": "#{data[1]}人",
+            "color": "#ff0000"
+          }
+        ],
+        "size": "sm",
+        "align": "center",
+        "wrap": true,
+        "adjustMode": "shrink-to-fit",
+        "margin": "lg"
+      }
+    end
+
+    contents
+  end
+
+  def create_predict_flex(array)
+    {
+      "type": "flex",
+      "altText": "this is a flex message",
+      "contents": {
+        "type": "bubble",
+        "header": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "text",
+              "text": "将来の感染者の予測",
+              "size": "lg",
+              "align": "center",
+              "wrap": true,
+              "adjustMode": "shrink-to-fit"
+            },
+            {
+              "type": "separator",
+              "margin": "md"
+            }
+          ]
+        },
+        "hero": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": create_boxes(array),
+          "flex": 2
+        },
+        "body": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": []
+        }
+      }
+    }
+  end
+
 
   ### 「ヘルプ」が押された際に表示するflex message
   def help_flex
@@ -252,6 +323,14 @@ module FlexMessage
                           "text": "統計学的に予測された将来30日間の感染者の推移を表示します。旅行を決定する際の一つの指標として参考にしてください。",
                           "size": "xs",
                           "margin": "lg",
+                          "wrap": true,
+                          "adjustMode": "shrink-to-fit"
+                        },
+                        {
+                          "type": "text",
+                          "text": "(※このデータは日本全体のデータです。)",
+                          "size": "xs",
+                          "margin": "sm",
                           "wrap": true,
                           "adjustMode": "shrink-to-fit"
                         }
