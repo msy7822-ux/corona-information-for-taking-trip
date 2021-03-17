@@ -1,5 +1,0 @@
-require Rails.root.join('lib/utils/google_api_methods')
-require Rails.root.join('lib/utils/corona_api_methods')
-require Rails.root.join('lib/utils/linebot_api_methods')
-require Rails.root.join('lib/utils/physical_condition')
-require Rails.root.join('lib/utils/flex_message')
