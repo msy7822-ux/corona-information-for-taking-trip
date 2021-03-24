@@ -115,17 +115,13 @@ class LineBotController < ApplicationController
         end
       }
 
-      pp positives_each_week = first_days_last_days_for_a_week.map{ |first_day, last_day|
+      positives_each_week = first_days_last_days_for_a_week.map{ |first_day, last_day|
         incremented_positive_num = last_day[1].to_i - first_day[1].to_i
         first_day = first_day[0].insert(2, '/')
         last_day = last_day[0].insert(2, '/')
 
         [first_day, last_day, incremented_positive_num]
       }
-
-
-binding.pry
-
 
       message = create_predict_flex(positives_each_week)
       client.reply_message(event['replyToken'], message)
