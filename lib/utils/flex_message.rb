@@ -1,7 +1,4 @@
-# require './lib/utils/linebot_api_methods'
 module FlexMessage
-  # include LinebotApiMethods
-
   def create_hospitals_list(hospitals)
     contents = []
     hospitals.each do |hospital|
@@ -85,7 +82,7 @@ module FlexMessage
     array.each.with_index(1) do |data, index|
       contents << {
         "type": "text",
-        "text": "hello, world",
+        "text": "将来の感染者の予測",
         "contents": [
           {
             "type": "span",
@@ -93,11 +90,11 @@ module FlexMessage
           },
           {
             "type": "span",
-            "text": "#{data[0]}　"
+            "text": "#{data[0]} ~ #{data[1]}　"
           },
           {
             "type": "span",
-            "text": "#{data[1]}人",
+            "text": "#{data[2]}人",
             "color": "#ff0000"
           }
         ],

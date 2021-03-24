@@ -2,7 +2,6 @@ require './lib/utils/google_api_methods'
 require './lib/utils/linebot_api_methods'
 require './lib/utils/physical_condition'
 
-
 class LineBotController < ApplicationController
   include LinebotApiMethods
   include PhysicalCondition
@@ -22,23 +21,8 @@ class LineBotController < ApplicationController
   @@previous_message = nil
   ### 一回前の質問のpoint
   @@previous_point = 0
-  ##### コロナの症状のものと、そうではないものが合致して０になるのと、全ていいえで０になるのとは別なので、切り分けるためのクラス変数を用意する
-
-
-
-
 
   def callback
-
-    ### クラス変数たちの状態を確認する
-    puts "@@count : #{@@count}"
-    puts "@@is_checking : #{@@is_checking}"
-    puts "@@point : #{@@point}"
-    puts "@@previous_message : #{@@previous_message}"
-
-
-
-
 
     body = request.body.read
     # ### LINEプラットフォームからのPOST通信の署名
@@ -48,15 +32,12 @@ class LineBotController < ApplicationController
     end
 
     case event = client.parse_events_from(body)[0]
-    ### ユーザーからの各イベントごとの処理
+
     when Line::Bot::Event::Follow
-      ### usersテーブルに保存する処理を記述
-      # userId取得
       userId = event['source']['userId']
       create_user(userId)
       return
     when Line::Bot::Event::Unfollow
-      # userId取得
       userId = event['source']['userId']
       User.find_by(line_id: userId).destroy
       return
@@ -68,124 +49,51 @@ class LineBotController < ApplicationController
         message = access_google_places(lat, lng)
         client.reply_message(event['replyToken'], message)
       end
-      # userId取得
       userId = event['source']['userId']
     else
       receive_unrelated_message_while_question(event) unless @@count == 0
       return
     end
-
-
-
-
     ### 47都道府県の配列データの定数をprefectures変数に代入
     prefectures = PREFECTURES
-
 
     ### 位置情報のメッセージとテキストのメッセージ以外はスルーするというフィルタリング
     return if event.type != Line::Bot::Event::MessageType::Text && event.type != Line::Bot::Event::MessageType::Location
 
 
-    ### ユーザーが前回のやり取りで、「医療施設を検索する」とした場合
-    # if @@previous_message == '医療施設を検索する'
-    #   ### 区切り文字が半角スペでも全角スペでも統一の区切り文字に変換する
-    #   pref, city = event['message']['text'].split(/\　|\ /)
-
-    #   ### 存在しない都道府県なら、処理を終了する
-    #   unless prefectures.include?(pref)
-    #     not_find_pref(event['replyToken'])
-    #     @@previous_message = nil
-    #     return
-    #   end
-    #   ### 存在しない市町村なら、処理を終了する(true or falseを返す)
-    #   unless confirm_city_is_exist?(pref, city)
-    #     not_find_city(event['replyToken'])
-    #     @@previous_message = nil
-    #     return
-    #   end
-
-    #   message = {
-    #     type: 'text',
-    #     text: "#{pref}の#{city}というところにお住まいなんですね！"
-    #   }
-
-    #   client.reply_message(event['replyToken'], message)
-    # end
-
-
-
-
-
-
-
-
-    ### ユーザーからのメッセージの種類に応じて、処理を分岐する
     if prefectures.include?(event['message']['text'])
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
         receive_unrelated_message_while_question(event, userId)
         return
       end
-
       message = create_positives_status_message(event['message']['text'])
-
-      ### ユーザーに返信する
       client.reply_message(event['replyToken'], message)
-
-
-
-
-
-
     elsif event['message']['text'] == '全国'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
         receive_unrelated_message_while_question(event, userId)
         return
       end
-
-      ### FIXME:
       positives_num = positives_near_30days_all_prefectures.slice(-30, 30).map{|hash| hash["positive"].to_i}
       num = positives_num[29] - positives_num[0]
 
       message = positives_message("全国", num, "#1a1a1a", "注意")
-
       client.reply_message(event['replyToken'], message)
-
-
-
-
-
-
-
-
     elsif event['message']['text'] == '旅行の際に必要な対策を確認する'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
         receive_unrelated_message_while_question(event, userId)
         return
       end
-      ### ユーザーに返信する
       client.reply_message(event['replyToken'], create_flex_message)
-
-
-
-
-
-
-
     elsif event['message']['text'] == '目的地の感染者数を確認する'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
         receive_unrelated_message_while_question(event, userId)
         return
       end
-      # p client.reply_message(event['replyToken'], display_destination_positives)
       client.reply_message(event['replyToken'], create_quick_reply_all)
-
-
-
-
     elsif event['message']['text'] == '将来の予測を確認する'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -193,28 +101,40 @@ class LineBotController < ApplicationController
         return
       end
 
+      ### FIXME: コードの整理が必要
       predict_total_positives = predict_future_positives.map{|hash| "#{hash["date"].to_s.slice(-4, 4)}, #{hash["positive"]}" }
-      first_day_future_predict = predict_total_positives[0].split(', ')[1].to_i
-      last_days_for_a_week = []
-      predict_total_positives.each_slice(7){|arr| last_days_for_a_week << arr.last.split(', ') if arr.size == 7 }
-      positives_each_week = last_days_for_a_week.map{ |arr|
-        array = [arr[0].insert(2, '/'), arr[1].to_i - first_day_future_predict]
-        first_day_future_predict += arr[1].to_i - first_day_future_predict
-        array
+      first_days_last_days_for_a_week = []
+
+      predict_total_positives.each_slice(7){|arr|
+        array = []
+        if arr.size == 7
+          array << arr.first.split(', ')
+          array << arr.last.split(', ')
+
+          first_days_last_days_for_a_week << array
+        end
       }
+
+      pp positives_each_week = first_days_last_days_for_a_week.map{ |first_day, last_day|
+        incremented_positive_num = last_day[1].to_i - first_day[1].to_i
+        first_day = first_day[0].insert(2, '/')
+        last_day = last_day[0].insert(2, '/')
+
+        [first_day, last_day, incremented_positive_num]
+      }
+
+
+binding.pry
+
 
       message = create_predict_flex(positives_each_week)
       client.reply_message(event['replyToken'], message)
-
-
     elsif event['message']['text'] == '体調チェックをする' || event['message']['text'] == 'はい🙆‍♂️' || event['message']['text'] == 'いいえ🙅‍♂️'
-
       ### 体調チェック時以外の「はい🙆‍♂️」、「いいえ🙅‍♂️」はスルーする
       return if (event['message']['text'] == 'はい🙆‍♂️' || event['message']['text'] == 'いいえ🙅‍♂️') && @@count == 0 && @@is_checking == false
 
       ### 質問中に「体調チェックをする」と押された場合に、質問を1からやり直す
       if event['message']['text'] == '体調チェックをする' && @@count != 0 && @@is_checking == true
-        ### クラス変数の初期化処理
         initialize_class_variable
         stop_question_message(event['replyToken'])
         return
@@ -226,37 +146,19 @@ class LineBotController < ApplicationController
       ### 何問目の質問かは、クラス変数で保持
       if @@count < QUESTIONS_NUM
         message, point = create_confirm_message(@@count)
-        # @@previous_point = point
-        ### ここでいったんメッセージを送信しているので処理は終わるのか？
         client.reply_message(event['replyToken'], message)
 
-        ### もし「はい」がきたら、前回の質問が「はい」ということだから、前回のポイントを追加する
         @@point += @@previous_point if event['message']['text'] == 'はい🙆‍♂️'
         @@count += 1
-
-        p @@point
         @@previous_point = point
       elsif @@count == QUESTIONS_NUM
         ### ユーザーに表示するための診断結果を作成する
         diagnosis_result = create_diagnosis_result(@@point)
         client.reply_message(event['replyToken'], diagnosis_result)
 
-        ### 旅行前なのか後なのか？
-        # if @@check_timing == 'before trip'
-        #   User.update(condition_check_before_trip_is_ended: true)
-        # elsif @@check_timing == 'after trip'
-        #   User.update(condition_check_before_trip_is_ended: false)
-        # end
-
-        ### クラス変数の初期化処理
         initialize_class_variable
         return
       end
-
-
-
-
-
     elsif event['message']['text'] == '医療施設を検索する'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -265,7 +167,6 @@ class LineBotController < ApplicationController
       end
 
       client.reply_message(event['replyToken'], display_geo_button)
-
     elsif event['message']['text'] == 'ヘルプ'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -273,8 +174,6 @@ class LineBotController < ApplicationController
         return
       end
       client.reply_message(event['replyToken'], help_flex)
-
-      ### その他大勢のメッセージ
     else
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -282,14 +181,9 @@ class LineBotController < ApplicationController
         return
       end
     end
-
     ### 次回のメッセージにとっての、「前回のメッセージ」を格納する
     @@previous_message = event['message']['text']
   end
-
-
-
-
 
   private
 
@@ -308,11 +202,9 @@ class LineBotController < ApplicationController
       type: 'text',
       text: '体調チェックの質問と無関係なイベントが発生したため、体調チェックを中断します。🙇‍♂️'
     }
-    ### クラス変数の初期化処理
     initialize_class_variable
     client.reply_message(event['replyToken'], message)
   end
-
 
   ### 体調チェックによる診断結果の作成
   def create_diagnosis_result(point)
@@ -409,6 +301,4 @@ class LineBotController < ApplicationController
       }
     end
   end
-
 end
-
