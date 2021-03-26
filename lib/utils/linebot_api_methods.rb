@@ -18,7 +18,6 @@ module LinebotApiMethods
 
   ### follow時に、DBにuserを保存する
   def create_user(line_id)
-    ### unique: trueをつけたにもかかわらず、バリデーションが通過される。
     User.create!(line_id: line_id)
   end
 end
