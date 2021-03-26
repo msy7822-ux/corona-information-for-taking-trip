@@ -23,7 +23,6 @@ class LineBotController < ApplicationController
   @@previous_point = 0
 
   def callback
-
     body = request.body.read
     # ### LINEプラットフォームからのPOST通信の署名
     signature = request.env['HTTP_X_LINE_SIGNATURE']
@@ -35,7 +34,7 @@ class LineBotController < ApplicationController
 
     when Line::Bot::Event::Follow
       userId = event['source']['userId']
-      create_user(userId)
+      p create_user(userId)
       return
     when Line::Bot::Event::Unfollow
       userId = event['source']['userId']
