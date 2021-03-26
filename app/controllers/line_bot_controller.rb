@@ -34,11 +34,11 @@ class LineBotController < ApplicationController
 
     when Line::Bot::Event::Follow
       userId = event['source']['userId']
-      p create_user(userId)
+      create_user(userId)
       return
     when Line::Bot::Event::Unfollow
       userId = event['source']['userId']
-      User.find_by(line_id: userId).destroy
+      destroy_user(userId)
       return
     when Line::Bot::Event::Message
       case event.type
@@ -53,14 +53,14 @@ class LineBotController < ApplicationController
       receive_unrelated_message_while_question(event) unless @@count == 0
       return
     end
-    ### 47都道府県の配列データの定数をprefectures変数に代入
-    prefectures = PREFECTURES
+
+
 
     ### 位置情報のメッセージとテキストのメッセージ以外はスルーするというフィルタリング
     return if event.type != Line::Bot::Event::MessageType::Text && event.type != Line::Bot::Event::MessageType::Location
 
 
-    if prefectures.include?(event['message']['text'])
+    if all_prefectures.include?(event['message']['text'])
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
         receive_unrelated_message_while_question(event, userId)
@@ -68,6 +68,7 @@ class LineBotController < ApplicationController
       end
       message = create_positives_status_message(event['message']['text'])
       client.reply_message(event['replyToken'], message)
+
     elsif event['message']['text'] == '全国'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -79,6 +80,7 @@ class LineBotController < ApplicationController
 
       message = positives_message("全国", num, "#1a1a1a", "注意")
       client.reply_message(event['replyToken'], message)
+
     elsif event['message']['text'] == '旅行の際に必要な対策を確認する'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -86,6 +88,7 @@ class LineBotController < ApplicationController
         return
       end
       client.reply_message(event['replyToken'], create_flex_message)
+
     elsif event['message']['text'] == '目的地の感染者数を確認する'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -93,6 +96,7 @@ class LineBotController < ApplicationController
         return
       end
       client.reply_message(event['replyToken'], create_quick_reply_all)
+
     elsif event['message']['text'] == '将来の予測を確認する'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -124,11 +128,12 @@ class LineBotController < ApplicationController
 
       message = create_predict_flex(positives_each_week)
       client.reply_message(event['replyToken'], message)
+
     elsif event['message']['text'] == '体調チェックをする' || event['message']['text'] == 'はい🙆‍♂️' || event['message']['text'] == 'いいえ🙅‍♂️'
       ### 体調チェック時以外の「はい🙆‍♂️」、「いいえ🙅‍♂️」はスルーする
       return if (event['message']['text'] == 'はい🙆‍♂️' || event['message']['text'] == 'いいえ🙅‍♂️') && @@count == 0 && @@is_checking == false
 
-      ### 質問中に「体調チェックをする」と押された場合に、質問を1からやり直す
+      ### 質問中に「体調チェックをする」と押された場合に、体調チェックは中断する
       if event['message']['text'] == '体調チェックをする' && @@count != 0 && @@is_checking == true
         initialize_class_variable
         stop_question_message(event['replyToken'])
@@ -138,7 +143,7 @@ class LineBotController < ApplicationController
       ### 体調チェック中に切り替える
       @@is_checking = true
 
-      ### 何問目の質問かは、クラス変数で保持
+      ## 体調チェック中の処理
       if @@count < QUESTIONS_NUM
         message, point = create_confirm_message(@@count)
         client.reply_message(event['replyToken'], message)
@@ -147,13 +152,14 @@ class LineBotController < ApplicationController
         @@count += 1
         @@previous_point = point
       elsif @@count == QUESTIONS_NUM
-        ### ユーザーに表示するための診断結果を作成する
+
         diagnosis_result = create_diagnosis_result(@@point)
         client.reply_message(event['replyToken'], diagnosis_result)
 
         initialize_class_variable
         return
       end
+
     elsif event['message']['text'] == '医療施設を検索する'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -162,6 +168,7 @@ class LineBotController < ApplicationController
       end
 
       client.reply_message(event['replyToken'], display_geo_button)
+
     elsif event['message']['text'] == 'ヘルプ'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -169,6 +176,16 @@ class LineBotController < ApplicationController
         return
       end
       client.reply_message(event['replyToken'], help_flex)
+
+    elsif invalid_prefectures.include?(event['message']['text'])
+      ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
+      if @@count != 0 || @@is_checking == true
+        receive_unrelated_message_while_question(event, userId)
+        return
+      end
+
+      message = create_warning_prefecturs
+      client.reply_message(event['replyToken'], message)
     else
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true
@@ -195,7 +212,20 @@ class LineBotController < ApplicationController
   def receive_unrelated_message_while_question(event, line_id)
     message = {
       type: 'text',
-      text: '体調チェックの質問と無関係なイベントが発生したため、体調チェックを中断します。🙇‍♂️'
+      text: "体調チェックの質問と無関係なイベントが発生したため、体調チェックを中断します🙇‍♂️\n\n「体調チェック」というところをクリックすると、再度体調チェックを受けることができます。",
+      "quickReply": {
+        "items": [
+          {
+            "type": "action",
+            "imageUrl": "",
+            "action": {
+              "type": "message",
+              "label": "体調チェックをやり直す",
+              "text": "体調チェックをする"
+            }
+          }
+        ]
+      }
     }
     initialize_class_variable
     client.reply_message(event['replyToken'], message)
@@ -243,7 +273,7 @@ class LineBotController < ApplicationController
     elsif point < 2
       message = {
         type: "text",
-        text: "あなたの危険ポイントは#{@@point}です\n\n感染していると断定はできませんが、不安ならかかりつけ医に電話相談し旅行は控えたほうが良いかもしれませんね。😥",
+        text: "あなたの危険ポイントは#{@@point}です\n\n感染していると断定はできませんが、不安ならかかりつけ医に電話相談し旅行は控えたほうが良いかもしれませんね😥",
         "quickReply": {
           "items": [
             {
@@ -261,7 +291,7 @@ class LineBotController < ApplicationController
     elsif point < 9
       message = {
         type: "text",
-        text: "あなたの危険ポイントは#{@@point}です\n\n旅行は中止し、かかりつけ医に電話相談しその指示に従ってください。😖",
+        text: "あなたの危険ポイントは#{@@point}です\n\n旅行は中止し、かかりつけ医に電話相談しその指示に従ってください😖",
         "quickReply": {
           "items": [
             {
@@ -279,7 +309,7 @@ class LineBotController < ApplicationController
     elsif point >= 10
       message = {
         type: "text",
-        text: "あなたの危険ポイントは#{@@point}です\n\nあなたには、感染の疑いがあります。\n早急に保健所に連絡してください。😰",
+        text: "あなたの危険ポイントは#{@@point}です\n\nあなたには、感染の疑いがあります。\n早急に保健所に連絡してください😰",
         "quickReply": {
           "items": [
             {
