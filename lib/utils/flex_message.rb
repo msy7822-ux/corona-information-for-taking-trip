@@ -1,4 +1,5 @@
 module FlexMessage
+  ## 医療施設検索のフレックスメッセージ
   def create_hospitals_list(hospitals)
     contents = []
     hospitals.each do |hospital|
@@ -8,6 +9,10 @@ module FlexMessage
         "text": "#{hospital[0]}",
         "size": "md",
         "wrap": true,
+        "action": {
+          "type": "uri",
+          "uri": "https://coroinfo.herokuapp.com/maps/index"
+        },
         "adjustMode": "shrink-to-fit",
         "gravity": "center",
         "margin": "xl"
@@ -25,7 +30,7 @@ module FlexMessage
     contents
   end
 
-
+  ## 医療施設検索のフレックスメッセージ
   def display_hospitals_flex_message(hospitals)
     {
       "type": "flex",
@@ -61,6 +66,16 @@ module FlexMessage
                 {
                   "type": "image",
                   "url": "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/hospital-71.png"
+                },
+                {
+                  "type": "text",
+                  "text": "※病院名をクリックすると、詳細を見ることができます。",
+                  "size": "xs",
+                  "align": "start",
+                  "wrap": true,
+                  "margin": "xl",
+                  "color": "#f30000",
+                  "adjustMode": "shrink-to-fit"
                 }
               ]
             },
@@ -165,7 +180,7 @@ module FlexMessage
               "contents": [
                 {
                   "type": "text",
-                  "text": "CoroInfonについて",
+                  "text": "CoroInfoについて",
                   "size": "lg",
                   "wrap": true,
                   "align": "center",
@@ -239,6 +254,17 @@ module FlexMessage
                       "type": "text",
                       "text": "ことなので、そのために必要な機能を揃えました。",
                       "size": "xs",
+                      "align": "center",
+                      "wrap": true,
+                      "adjustMode": "shrink-to-fit"
+                    },
+                    {
+                      "type": "text",
+                      "text": "旅行の「きっかけ」としてご利用ください。",
+                      "size": "xs",
+                      "margin": "xl",
+                      "weight": "bold",
+                      "decoration": "underline",
                       "align": "center",
                       "wrap": true,
                       "adjustMode": "shrink-to-fit"
@@ -724,7 +750,7 @@ module FlexMessage
                   "contents": [
                     {
                       "type": "span",
-                      "text": "一定の安全な距離を保つ　",
+                      "text": "一定の安全な距離を保つ。　",
                       "decoration": "none",
                       "weight": "bold",
                       "size": "xs"

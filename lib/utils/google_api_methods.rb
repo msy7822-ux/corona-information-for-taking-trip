@@ -15,8 +15,16 @@ module GoogleApiMethods
 
     hospital_infos = []
     access_api(uri)['results'].map{ |hash|
-      hospital_infos << [hash['name'], hash['vicinity']]
+      hospital_infos << [hash['name'], hash['vicinity'], hash["geometry"]["location"]]
     }
-    message = display_hospitals_flex_message(hospital_infos)
+    if hospital_infos.size == 0
+      message = {
+        "type": "text",
+        "text": "近くに医療施設が見つかりませんでした。"
+      }
+      return message
+    else
+      return display_hospitals_flex_message(hospital_infos)
+    end
   end
 end
