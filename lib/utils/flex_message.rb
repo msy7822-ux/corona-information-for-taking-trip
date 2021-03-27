@@ -11,7 +11,7 @@ module FlexMessage
         "wrap": true,
         "action": {
           "type": "uri",
-          "uri": "https://83487122f0a6.ngrok.io/maps/index?lat=#{hospital[2][0]}&long=#{hospital[2][1]}&y_lat=#{hospital[3][0]}&y_long=#{hospital[3][1]}"
+          "uri": "https://coroinfo.herokuapp.com/maps/index?lat=#{hospital[2][0]}&long=#{hospital[2][1]}&y_lat=#{hospital[3][0]}&y_long=#{hospital[3][1]}"
         },
         "adjustMode": "shrink-to-fit",
         "gravity": "center",
@@ -24,7 +24,7 @@ module FlexMessage
         "wrap": true,
         "action": {
           "type": "uri",
-          "uri": "https://83487122f0a6.ngrok.io/maps/index?lat=#{hospital[2][0]}&long=#{hospital[2][1]}&y_lat=#{hospital[3][0]}&y_long=#{hospital[3][1]}"
+          "uri": "https://coroinfo.herokuapp.com/maps/index?lat=#{hospital[2][0]}&long=#{hospital[2][1]}&y_lat=#{hospital[3][0]}&y_long=#{hospital[3][1]}"
         },
         "adjustMode": "shrink-to-fit",
         "gravity": "center"
