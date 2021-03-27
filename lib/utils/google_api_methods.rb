@@ -15,7 +15,9 @@ module GoogleApiMethods
 
     hospital_infos = []
     access_api(uri)['results'].map{ |hash|
-      hospital_infos << [hash['name'], hash['vicinity'], hash["geometry"]["location"]]
+      your_location = [lat, lng]
+      location = [hash["geometry"]["location"]["lat"], hash["geometry"]["location"]["lng"]]
+      hospital_infos << [hash['name'], hash['vicinity'], location, your_location]
     }
     if hospital_infos.size == 0
       message = {
