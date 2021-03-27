@@ -11,7 +11,7 @@ module FlexMessage
         "wrap": true,
         "action": {
           "type": "uri",
-          "uri": "https://coroinfo.herokuapp.com/maps/index"
+          "uri": "https://83487122f0a6.ngrok.io/maps/index?lat=#{hospital[2][0]}&long=#{hospital[2][1]}&y_lat=#{hospital[3][0]}&y_long=#{hospital[3][1]}"
         },
         "adjustMode": "shrink-to-fit",
         "gravity": "center",
@@ -22,6 +22,10 @@ module FlexMessage
         "text": "#{hospital[1]}",
         "size": "xxs",
         "wrap": true,
+        "action": {
+          "type": "uri",
+          "uri": "https://83487122f0a6.ngrok.io/maps/index?lat=#{hospital[2][0]}&long=#{hospital[2][1]}&y_lat=#{hospital[3][0]}&y_long=#{hospital[3][1]}"
+        },
         "adjustMode": "shrink-to-fit",
         "gravity": "center"
       }
@@ -69,7 +73,7 @@ module FlexMessage
                 },
                 {
                   "type": "text",
-                  "text": "※病院名をクリックすると、詳細を見ることができます。",
+                  "text": "※病院名をクリックすると、位置情報の詳細を見ることができます。",
                   "size": "xs",
                   "align": "start",
                   "wrap": true,

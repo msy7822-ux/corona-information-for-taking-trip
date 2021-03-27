@@ -1,4 +1,4 @@
-<h2>gmap</h2>
+<h2>詳細位置情報</h2>
 <div id='map'></div>
 
 <style>
@@ -9,11 +9,36 @@
 </style>
 
 <script>
+str = window.location.search.substring(1).split('&')
+// ["lat=36.6693754", "long=137.212932"]
+lat = Number(str[0].split("=")[1])
+long = Number(str[1].split("=")[1])
+y_lat = Number(str[2].split("=")[1])
+y_long = Number(str[3].split("=")[1])
+
 function initMap(){
-  let map = new google.maps.Map(document.getElementById('map'), {
-  center: {lat: -34.397, lng: 150.644},
-  zoom: 12
+  // console.log(<%= @lat %>);
+  var latlng = new google.maps.LatLng(lat, long);
+  var y_latlong = new google.maps.LatLng(y_lat, y_long);
+
+  var myOptions = {
+    zoom: 12,
+    center: latlng,
+    mapTypeId: 'roadmap'
+  };
+
+  var map = new google.maps.Map(document.getElementById("map"), myOptions);
+  var marker = new google.maps.Marker({
+    position: latlng,
+    map: map,
+    title:"検索結果",
   });
+
+  // var your_location = new google.maps.Marker({
+  //   position: y_latlong,
+  //   map: map,
+  //   titla: "あなたの現在位置",
+  // });
 }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7vJ3bEEdA0xGY_cuAOX46BDzUyXHpGq4&callback=initMap" async defer></script>
