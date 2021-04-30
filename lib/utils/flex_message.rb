@@ -128,44 +128,44 @@ module FlexMessage
     contents
   end
 
-  def create_predict_flex(array)
-    {
-      "type": "flex",
-      "altText": "今後30日間の感染者数の予測です。",
-      "contents": {
-        "type": "bubble",
-        "header": {
-          "type": "box",
-          "layout": "vertical",
-          "contents": [
-            {
-              "type": "text",
-              "text": "将来の感染者の予測",
-              "size": "lg",
-              "align": "center",
-              "wrap": true,
-              "adjustMode": "shrink-to-fit"
-            },
-            {
-              "type": "separator",
-              "margin": "md"
-            }
-          ]
-        },
-        "hero": {
-          "type": "box",
-          "layout": "vertical",
-          "contents": create_boxes(array),
-          "flex": 2
-        },
-        "body": {
-          "type": "box",
-          "layout": "vertical",
-          "contents": []
-        }
-      }
-    }
-  end
+  # def create_predict_flex(array)
+  #   {
+  #     "type": "flex",
+  #     "altText": "今後30日間の感染者数の予測です。",
+  #     "contents": {
+  #       "type": "bubble",
+  #       "header": {
+  #         "type": "box",
+  #         "layout": "vertical",
+  #         "contents": [
+  #           {
+  #             "type": "text",
+  #             "text": "将来の感染者の予測",
+  #             "size": "lg",
+  #             "align": "center",
+  #             "wrap": true,
+  #             "adjustMode": "shrink-to-fit"
+  #           },
+  #           {
+  #             "type": "separator",
+  #             "margin": "md"
+  #           }
+  #         ]
+  #       },
+  #       "hero": {
+  #         "type": "box",
+  #         "layout": "vertical",
+  #         "contents": create_boxes(array),
+  #         "flex": 2
+  #       },
+  #       "body": {
+  #         "type": "box",
+  #         "layout": "vertical",
+  #         "contents": []
+  #       }
+  #     }
+  #   }
+  # end
 
 
   ### 「ヘルプ」が押された際に表示するflex message

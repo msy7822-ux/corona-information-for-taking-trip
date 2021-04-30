@@ -34,7 +34,7 @@ module CoronaApiMethods
   def quick_reply_prefs
     # ["北海道", "宮城県", "千葉県","東京都","神奈川県","石川県", "愛知県", "京都府","大阪府","兵庫県", "福岡県", "沖縄県"]
     ### 47都道府県のうち、ランダムで12都道府県を取り出して、表示するようにする
-    PREFECTURES.shuffle.slice(0, 12)
+    PREFECTURES.shuffle.slice(0, 13)
   end
 
   ### 直近３０日間の感染者数をユーザーに知らせるテキストメッセージを作成する
@@ -113,9 +113,7 @@ module CoronaApiMethods
 
   ### 全国のクイックリプライを用意する
   def create_quick_reply_all
-    items = [
-      {"type": "action", "imageUrl": "", "action": { "type": "message", "label": "全国", "text": "全国"}}
-    ]
+    items = []
     quick_reply_prefs.each do |pref|
       items << {"type": "action", "imageUrl": "", "action": { "type": "message", "label": "#{pref}", "text": "#{pref}"}}
     end
