@@ -173,7 +173,14 @@ class LineBotController < ApplicationController
         return
       end
 
-      client.reply_message(event['replyToken'], display_geo_button)
+      # client.reply_message(event['replyToken'], display_geo_button)
+      text = "現在、こちらの機能をご利用いただくことができません。"
+      message = {
+        type: 'text',
+        text: text
+      }
+
+      client.reply_message(event['replyToken'], message)
 
     elsif event['message']['text'] == 'ヘルプ'
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
