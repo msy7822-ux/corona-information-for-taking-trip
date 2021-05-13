@@ -9,9 +9,9 @@ module GoogleApiMethods
   def access_google_places(lat, lng)
     rad = 5000
     types = "hospital"
-    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=#{lat},#{lng}&radius=#{rad}&types=#{types}&sensor=false&language=ja&key=#{API_KEY}"
+    # url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=#{lat},#{lng}&radius=#{rad}&types=#{types}&sensor=false&language=ja&key=#{API_KEY}"
 
-    uri = URI.parse(url)
+    # uri = URI.parse(url)
 
     hospital_infos = []
     access_api(uri)['results'].map{ |hash|

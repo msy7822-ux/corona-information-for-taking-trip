@@ -128,44 +128,44 @@ module FlexMessage
     contents
   end
 
-  # def create_predict_flex(array)
-  #   {
-  #     "type": "flex",
-  #     "altText": "今後30日間の感染者数の予測です。",
-  #     "contents": {
-  #       "type": "bubble",
-  #       "header": {
-  #         "type": "box",
-  #         "layout": "vertical",
-  #         "contents": [
-  #           {
-  #             "type": "text",
-  #             "text": "将来の感染者の予測",
-  #             "size": "lg",
-  #             "align": "center",
-  #             "wrap": true,
-  #             "adjustMode": "shrink-to-fit"
-  #           },
-  #           {
-  #             "type": "separator",
-  #             "margin": "md"
-  #           }
-  #         ]
-  #       },
-  #       "hero": {
-  #         "type": "box",
-  #         "layout": "vertical",
-  #         "contents": create_boxes(array),
-  #         "flex": 2
-  #       },
-  #       "body": {
-  #         "type": "box",
-  #         "layout": "vertical",
-  #         "contents": []
-  #       }
-  #     }
-  #   }
-  # end
+  def create_predict_flex(array)
+    {
+      "type": "flex",
+      "altText": "今後30日間の感染者数の予測です。",
+      "contents": {
+        "type": "bubble",
+        "header": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "text",
+              "text": "将来の感染者の予測",
+              "size": "lg",
+              "align": "center",
+              "wrap": true,
+              "adjustMode": "shrink-to-fit"
+            },
+            {
+              "type": "separator",
+              "margin": "md"
+            }
+          ]
+        },
+        "hero": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": create_boxes(array),
+          "flex": 2
+        },
+        "body": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": []
+        }
+      }
+    }
+  end
 
 
   ### 「ヘルプ」が押された際に表示するflex message
@@ -605,6 +605,87 @@ module FlexMessage
                     "type": "uri",
                     "label": "位置情報を送信する",
                     "uri": "line://nv/location"
+                  },
+                  "margin": "none",
+                  "height": "sm",
+                  "style": "secondary",
+                  "adjustMode": "shrink-to-fit"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  end
+
+  ### 位置情報送信ボタンを表示する
+  def open_chat_button
+    {
+      "type": "flex",
+      "altText": "位置情報ボタンです。",
+      "contents": {
+        "type": "carousel",
+        "contents": [
+          {
+            "type": "bubble",
+            "size": "mega",
+            "header": {
+              "type": "box",
+              "layout": "vertical",
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "医療施設検索",
+                  "wrap": true,
+                  "adjustMode": "shrink-to-fit",
+                  "align": "center",
+                  "size": "lg"
+                },
+                {
+                  "type": "separator",
+                  "margin": "md"
+                }
+              ]
+            },
+            "hero": {
+              "type": "box",
+              "layout": "vertical",
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "あなたの最寄りの医療施設を検索します。",
+                  "adjustMode": "shrink-to-fit",
+                  "wrap": true,
+                  "margin": "none",
+                  "size": "xs",
+                  "align": "center",
+                  "offsetStart": "none",
+                  "offsetEnd": "none"
+                },
+                {
+                  "type": "text",
+                  "text": "下記のボタンから位置情報を送信してください。",
+                  "align": "center",
+                  "wrap": true,
+                  "adjustMode": "shrink-to-fit",
+                  "size": "xs",
+                  "margin": "sm"
+                }
+              ],
+              "margin": "none"
+            },
+            "body": {
+              "type": "box",
+              "layout": "vertical",
+              "contents": [
+                {
+                  "type": "button",
+                  "action": {
+                    "type": "uri",
+                    "label": "チャットページを開く",
+                    "uri": "https://line.me/R/oaMessage/@777khyfa/"
+                    # "uri": "https://line.me/R/nv/chat"
                   },
                   "margin": "none",
                   "height": "sm",

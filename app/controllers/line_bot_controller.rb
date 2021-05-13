@@ -45,7 +45,13 @@ class LineBotController < ApplicationController
       when Line::Bot::Event::MessageType::Location
         lat = event["message"]["latitude"]
         lng = event["message"]["longitude"]
-        message = access_google_places(lat, lng)
+        # message = access_google_places(lat, lng)
+        text = "現在、こちらの機能をご利用いただくことができません。"
+        message = {
+          type: 'text',
+          text: text
+        }
+
         client.reply_message(event['replyToken'], message)
       end
       userId = event['source']['userId']
@@ -97,37 +103,37 @@ class LineBotController < ApplicationController
       end
       client.reply_message(event['replyToken'], create_quick_reply_all)
 
-    # elsif event['message']['text'] == '将来の予測を確認する'
-    #   ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
-    #   if @@count != 0 || @@is_checking == true
-    #     receive_unrelated_message_while_question(event, userId)
-    #     return
-    #   end
+    elsif event['message']['text'] == '将来の予測を確認する'
+      ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
+      if @@count != 0 || @@is_checking == true
+        receive_unrelated_message_while_question(event, userId)
+        return
+      end
 
-    #   ### FIXME: コードの整理が必要
-    #   predict_total_positives = predict_future_positives.map{|hash| "#{hash["date"].to_s.slice(-4, 4)}, #{hash["positive"]}" }
-    #   first_days_last_days_for_a_week = []
+      ### FIXME: コードの整理が必要
+      predict_total_positives = predict_future_positives.map{|hash| "#{hash["date"].to_s.slice(-4, 4)}, #{hash["positive"]}" }
+      first_days_last_days_for_a_week = []
 
-    #   predict_total_positives.each_slice(7){|arr|
-    #     array = []
-    #     if arr.size == 7
-    #       array << arr.first.split(', ')
-    #       array << arr.last.split(', ')
+      predict_total_positives.each_slice(7){|arr|
+        array = []
+        if arr.size == 7
+          array << arr.first.split(', ')
+          array << arr.last.split(', ')
 
-    #       first_days_last_days_for_a_week << array
-    #     end
-    #   }
+          first_days_last_days_for_a_week << array
+        end
+      }
 
-    #   positives_each_week = first_days_last_days_for_a_week.map{ |first_day, last_day|
-    #     incremented_positive_num = last_day[1].to_i - first_day[1].to_i
-    #     first_day = first_day[0].insert(2, '/')
-    #     last_day = last_day[0].insert(2, '/')
+      positives_each_week = first_days_last_days_for_a_week.map{ |first_day, last_day|
+        incremented_positive_num = last_day[1].to_i - first_day[1].to_i
+        first_day = first_day[0].insert(2, '/')
+        last_day = last_day[0].insert(2, '/')
 
-    #     [first_day, last_day, incremented_positive_num]
-    #   }
+        [first_day, last_day, incremented_positive_num]
+      }
 
-    #   message = create_predict_flex(positives_each_week)
-    #   client.reply_message(event['replyToken'], message)
+      message = create_predict_flex(positives_each_week)
+      client.reply_message(event['replyToken'], message)
 
     elsif event['message']['text'] == '体調チェックをする' || event['message']['text'] == 'はい🙆‍♂️' || event['message']['text'] == 'いいえ🙅‍♂️'
       ### 体調チェック時以外の「はい🙆‍♂️」、「いいえ🙅‍♂️」はスルーする
@@ -186,6 +192,13 @@ class LineBotController < ApplicationController
 
       message = create_warning_prefecturs
       client.reply_message(event['replyToken'], message)
+
+    elsif event['message']['text'] == 'その他の都道府県を検索する'
+      if @@count != 0 || @@is_checking == true
+        receive_unrelated_message_while_question(event, userId)
+        return
+      end
+      client.reply_message(event['replyToken'], open_chat_button)
     else
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true

@@ -34,7 +34,7 @@ module CoronaApiMethods
   def quick_reply_prefs
     # ["北海道", "宮城県", "千葉県","東京都","神奈川県","石川県", "愛知県", "京都府","大阪府","兵庫県", "福岡県", "沖縄県"]
     ### 47都道府県のうち、ランダムで12都道府県を取り出して、表示するようにする
-    PREFECTURES.shuffle.slice(0, 13)
+    PREFECTURES.shuffle.slice(0, 12)
   end
 
   ### 直近３０日間の感染者数をユーザーに知らせるテキストメッセージを作成する
@@ -89,7 +89,8 @@ module CoronaApiMethods
 
   ### 将来30日の日本の感染者数の予測
   def predict_future_positives
-    uri = URI.parse("https://covid19-japan-web-api.now.sh/api/v1/total?predict=true")
+    params = URI.encode_www_form({predict: true})
+    uri = URI.parse("https://covid19-japan-web-api.vercel.app/api/v1/total?#{params}")
     access_api(uri)
   end
 
@@ -113,7 +114,15 @@ module CoronaApiMethods
 
   ### 全国のクイックリプライを用意する
   def create_quick_reply_all
-    items = []
+    # items = [ {"type": "action", "imageUrl": "", "action": { "type": "message", "label": "その他の都道府県を検索する", "text": "その他の都道府県を検索する"}}]
+    items = [ {"type": "action", "imageUrl": "",
+      "action": {
+        "type": "uri",
+        "label": "その他の都道府県を調べる",
+        "uri": "https://line.me/R/oaMessage/@777khyfa/"
+      }
+    }]
+    p items[0]
     quick_reply_prefs.each do |pref|
       items << {"type": "action", "imageUrl": "", "action": { "type": "message", "label": "#{pref}", "text": "#{pref}"}}
     end
