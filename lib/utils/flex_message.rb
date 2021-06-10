@@ -167,7 +167,7 @@ module FlexMessage
               "action": {
                 "type": "uri",
                 "label": "グラフを表示する",
-                "uri": "https://666640e71e8b.ngrok.io/feature_predict/index"
+                "uri": "https://coroinfo.herokuapp.com/feature_predict/index"
               }
             }
           ]
