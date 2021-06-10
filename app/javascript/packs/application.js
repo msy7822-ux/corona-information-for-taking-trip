@@ -7,7 +7,10 @@ import Rails from "@rails/ujs"
 import Turbolinks from "turbolinks"
 import * as ActiveStorage from "@rails/activestorage"
 import "channels"
+import Highcharts from "highcharts"
+import HighchartsMore from 'highcharts/highcharts-more';
 
 Rails.start()
 Turbolinks.start()
 ActiveStorage.start()
+window.Highcharts = Highcharts;

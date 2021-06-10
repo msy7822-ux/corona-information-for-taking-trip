@@ -206,6 +206,7 @@ class LineBotController < ApplicationController
         return
       end
       client.reply_message(event['replyToken'], open_chat_button)
+
     else
       ### 体調チェック中にこのイベントが発火されたら、体調チェックを中断する
       if @@count != 0 || @@is_checking == true

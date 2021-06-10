@@ -161,7 +161,16 @@ module FlexMessage
         "body": {
           "type": "box",
           "layout": "vertical",
-          "contents": []
+          "contents": [
+            {
+              "type": "button",
+              "action": {
+                "type": "uri",
+                "label": "グラフを表示する",
+                "uri": "https://666640e71e8b.ngrok.io/feature_predict/index"
+              }
+            }
+          ]
         }
       }
     }
