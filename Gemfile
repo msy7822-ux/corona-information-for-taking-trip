@@ -38,6 +38,8 @@ gem 'google-cloud-firestore'
 gem 'whenever'
 # google places
 gem 'google_places'
+# making graph
+gem 'lazy_high_charts'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
